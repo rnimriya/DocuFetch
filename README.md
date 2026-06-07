@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DocuFetch
+
+A production-ready Micro-SaaS for secure client document collection.
+
+Send a branded upload link → client uploads files (no account needed) → you review, approve or reject → request auto-completes when all docs are in.
+
+## Tech Stack
+
+- **Frontend:** Next.js 16 (App Router), Tailwind CSS v4, Shadcn/ui
+- **Backend/Database:** Supabase (PostgreSQL + RLS + Storage + Auth)
+- **Payments:** Stripe (subscription billing, webhook handling)
+- **Email:** Resend + React Email
+- **Hosting:** Vercel + Supabase
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone & install
+
+```bash
+git clone https://github.com/rnimriya/DocuFetch.git
+cd DocuFetch
+npm install
+```
+
+### 2. Configure environment variables
+
+Fill in `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_ID=price_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=noreply@yourdomain.com
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+### 3. Set up Supabase
+
+1. Run `supabase/migrations/20240101000000_init.sql` in the Supabase SQL editor
+2. Create a **private** Storage bucket named `documents`
+3. Add `{your_url}/auth/callback` to Auth redirect URLs
+
+### 4. Set up Stripe
+
+1. Create a monthly price at $49, copy → `STRIPE_PRICE_ID`
+2. Register webhook → `{your_url}/api/webhooks/stripe`
+3. Subscribe to: `customer.subscription.*`, `invoice.payment_*`, `checkout.session.completed`
+
+### 5. Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Zero-friction client portal** — clients upload via a secure token link, no account required
+- **Structured document requests** — define required documents with file type and size constraints
+- **Approve/reject workflow** — review each upload, reject with a note to prompt re-upload
+- **Automated emails** — request sent, document uploaded, request complete
+- **Multi-tenant workspaces** — full row-level security via Supabase RLS
+- **Stripe subscription billing** — 14-day free trial, idempotent webhook handling
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## License
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
